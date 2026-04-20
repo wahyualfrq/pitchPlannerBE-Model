@@ -15,7 +15,7 @@ PitchPlanner Backend is a Flask-based RESTful API designed to optimize cricket m
 
 1. **Clone the repository** (if you haven't already):
    ```bash
-   git clone <https://github.com/wahyualfrq/pitchPlannerBE-Model.git>
+   git clone https://github.com/wahyualfrq/pitchPlannerBE-Model.git
    cd pitchPlannerBE
    ```
 
