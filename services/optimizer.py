@@ -42,39 +42,55 @@ def preprocess_data(df):
         raise KeyError(f"Dataset is missing required logical columns: {missing}. Please check the CSV format.")
 
     try:
-        if 'Time' in df_processed.columns:
-            # Clean up the strings to avoid issues with extra spaces
+        # Build datetime string from available columns
+        if 'Date' in df_processed.columns:
             dates = df_processed['Date'].astype(str).str.strip()
-            times = df_processed['Time'].astype(str).str.strip()
             
-            if 'AmPm' in df_processed.columns:
-                ampms = df_processed['AmPm'].astype(str).str.strip()
-                datetime_str = dates + ' ' + times + ' ' + ampms
+            if 'Time' in df_processed.columns:
+                times = df_processed['Time'].astype(str).str.strip()
+                if 'AmPm' in df_processed.columns:
+                    ampms = df_processed['AmPm'].astype(str).str.strip().str.upper()
+                    # Filter out any non-AM/PM strings
+                    ampms = ampms.apply(lambda x: x if x in ['AM', 'PM'] else '')
+                    datetime_str = dates + ' ' + times + ' ' + ampms
+                else:
+                    datetime_str = dates + ' ' + times
             else:
-                datetime_str = dates + ' ' + times
+                datetime_str = dates
         else:
-            datetime_str = df_processed['Date'].astype(str).str.strip()
-            
-        # Robust date parsing: try dayfirst=True first for DD/MM/YYYY formats
+            # Fallback if somehow Date is missing but we got this far
+            raise KeyError("Kolom tanggal (Date) tidak ditemukan.")
+
+        # Enhanced parsing with mixed format support and dayfirst priority
         df_processed['DATETIME'] = pd.to_datetime(
             datetime_str, 
-            dayfirst=True, 
+            dayfirst=True,
+            format='mixed', 
             errors='coerce'
         )
         
-        # If any failed, try without dayfirst just in case
+        # Secondary check for rows that failed to parse
         mask = df_processed['DATETIME'].isna()
         if mask.any():
+            # Try parsing just the date part for failed rows
             df_processed.loc[mask, 'DATETIME'] = pd.to_datetime(
-                datetime_str[mask], 
-                dayfirst=False, 
+                dates[mask], 
+                dayfirst=True,
                 errors='coerce'
             )
         
     except Exception as e:
         raise ValueError(f"Gagal memproses kolom Tanggal/Waktu: {str(e)}")
 
-    df_processed = df_processed.dropna(subset=['DATETIME', 'Team_A', 'Team_B', 'Venue'])
+    # Drop rows where datetime could not be determined
+    df_processed = df_processed.dropna(subset=['DATETIME'])
+    
+    # Ensure other required columns exist after drop
+    for col in ['Team_A', 'Team_B', 'Venue']:
+        if col not in df_processed.columns:
+             df_processed[col] = "Unknown"
+        else:
+             df_processed = df_processed.dropna(subset=[col])
     
     match_duration = timedelta(hours=3, minutes=30)
     df_processed['START_TIME'] = df_processed['DATETIME']
