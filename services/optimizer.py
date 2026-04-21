@@ -3,24 +3,29 @@ import numpy as np
 from datetime import timedelta
 
 def standardize_columns(df):
-    """Standardize DataFrame columns."""
+    """Standardize DataFrame columns with protection against duplicates."""
     col_mapping = {}
+    seen_targets = set()
+    
+    # Priority order for mapping to avoid duplicates
+    # We process in a specific order so that 'DATE' takes precedence over 'STARTTIME' if both exist
+    categories = [
+        (['HOMETEAM', 'TEAM1', 'TEAMA', 'HOME'], 'Team_A'),
+        (['AWAYTEAM', 'TEAM2', 'TEAMB', 'AWAY'], 'Team_B'),
+        (['VENUE', 'STADIUM', 'LOCATION', 'GROUND', 'MATCHVENUE'], 'Venue'),
+        (['DATE', 'MATCHDATE', 'DATETIME', 'STARTDATE'], 'Date'),
+        (['TIME', 'MATCHTIME', 'STARTTIME'], 'Time'),
+        (['PM/AM', 'AMPM', 'MERIDIEM'], 'AmPm')
+    ]
     
     for col in df.columns:
         clean_col = str(col).upper().replace(' ', '').replace('_', '').replace('.', '')
         
-        if clean_col in ['HOMETEAM', 'TEAM1', 'TEAMA', 'HOME']:
-            col_mapping[col] = 'Team_A'
-        elif clean_col in ['AWAYTEAM', 'TEAM2', 'TEAMB', 'AWAY']:
-            col_mapping[col] = 'Team_B'
-        elif clean_col in ['VENUE', 'STADIUM', 'LOCATION', 'GROUND', 'MATCHVENUE']:
-            col_mapping[col] = 'Venue'
-        elif clean_col in ['DATE', 'MATCHDATE', 'DATETIME', 'STARTDATE', 'STARTTIME']:
-            col_mapping[col] = 'Date'
-        elif clean_col in ['TIME', 'MATCHTIME']:
-            col_mapping[col] = 'Time'
-        elif clean_col in ['PM/AM', 'AMPM', 'MERIDIEM']:
-            col_mapping[col] = 'AmPm'
+        for patterns, target in categories:
+            if clean_col in patterns and target not in seen_targets:
+                col_mapping[col] = target
+                seen_targets.add(target)
+                break
 
     df_renamed = df.rename(columns=col_mapping)
     return df_renamed
@@ -38,17 +43,36 @@ def preprocess_data(df):
 
     try:
         if 'Time' in df_processed.columns:
-            if 'AmPm' in df_processed.columns:
-                datetime_str = df_processed['Date'].astype(str) + ' ' + df_processed['Time'].astype(str) + ' ' + df_processed['AmPm'].astype(str)
-            else:
-                datetime_str = df_processed['Date'].astype(str) + ' ' + df_processed['Time'].astype(str)
-        else:
-            datetime_str = df_processed['Date'].astype(str)
+            # Clean up the strings to avoid issues with extra spaces
+            dates = df_processed['Date'].astype(str).str.strip()
+            times = df_processed['Time'].astype(str).str.strip()
             
-        df_processed['DATETIME'] = pd.to_datetime(datetime_str, dayfirst=True, format='mixed', errors='coerce')
+            if 'AmPm' in df_processed.columns:
+                ampms = df_processed['AmPm'].astype(str).str.strip()
+                datetime_str = dates + ' ' + times + ' ' + ampms
+            else:
+                datetime_str = dates + ' ' + times
+        else:
+            datetime_str = df_processed['Date'].astype(str).str.strip()
+            
+        # Robust date parsing: try dayfirst=True first for DD/MM/YYYY formats
+        df_processed['DATETIME'] = pd.to_datetime(
+            datetime_str, 
+            dayfirst=True, 
+            errors='coerce'
+        )
+        
+        # If any failed, try without dayfirst just in case
+        mask = df_processed['DATETIME'].isna()
+        if mask.any():
+            df_processed.loc[mask, 'DATETIME'] = pd.to_datetime(
+                datetime_str[mask], 
+                dayfirst=False, 
+                errors='coerce'
+            )
         
     except Exception as e:
-        raise ValueError(f"Failed to parse Date/Time columns: {str(e)}")
+        raise ValueError(f"Gagal memproses kolom Tanggal/Waktu: {str(e)}")
 
     df_processed = df_processed.dropna(subset=['DATETIME', 'Team_A', 'Team_B', 'Venue'])
     
