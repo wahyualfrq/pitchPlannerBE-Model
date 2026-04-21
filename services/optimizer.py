@@ -3,11 +3,7 @@ import numpy as np
 from datetime import timedelta
 
 def standardize_columns(df):
-    """
-    Standardize DataFrame columns using dictionary-based fuzzy matching.
-    Maps inconsistent column names to standard schema:
-    ["Team_A", "Team_B", "Venue", "Date", "Time", "AmPm"]
-    """
+    """Standardize DataFrame columns."""
     col_mapping = {}
     
     for col in df.columns:
@@ -30,10 +26,7 @@ def standardize_columns(df):
     return df_renamed
 
 def preprocess_data(df):
-    """
-    Preprocess the raw dataset resiliently.
-    Handles column mapping, missing values, and date parsing.
-    """
+    """Preprocess the raw dataset."""
     df_processed = standardize_columns(df.copy())
     
     required_cols = {'Team_A', 'Team_B', 'Venue', 'Date'}
@@ -71,9 +64,7 @@ def preprocess_data(df):
     return df_processed
 
 def check_conflict(match, selected_matches):
-    """
-    Check if a match conflicts with already selected matches.
-    """
+    """Check if a match conflicts with already selected matches."""
     for selected in selected_matches:
         time_overlap = (match['START_TIME'] < selected['END_TIME']) and (selected['START_TIME'] < match['END_TIME'])
         
@@ -90,9 +81,7 @@ def check_conflict(match, selected_matches):
     return False
 
 def optimize_schedule(df):
-    """
-    Apply greedy algorithm to optimize match scheduling.
-    """
+    """Apply greedy algorithm to optimize match scheduling."""
     sorted_df = df.sort_values(by='START_TIME').reset_index(drop=True)
     
     selected_matches = []
@@ -109,10 +98,8 @@ def optimize_schedule(df):
     
     return df_selected, df_rejected
 
-def load_and_optimize(filepath='ipl_schedule.csv'):
-    """
-    Helper function to load data from file, preprocess, and optimize.
-    """
+def load_and_optimize(filepath='data/ipl_schedule.csv'):
+    """Helper function to load data from file, preprocess, and optimize."""
     df = pd.read_csv(filepath, on_bad_lines='skip')
     df_processed = preprocess_data(df)
     df_selected, df_rejected = optimize_schedule(df_processed)

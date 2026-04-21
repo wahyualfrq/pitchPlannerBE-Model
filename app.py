@@ -2,27 +2,21 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
 import os
-from optimizer import load_and_optimize, preprocess_data, optimize_schedule
+from services.optimizer import load_and_optimize, preprocess_data, optimize_schedule
 
 app = Flask(__name__)
 CORS(app)
 
-DEFAULT_CSV_PATH = 'ipl_schedule.csv'
+DEFAULT_CSV_PATH = 'data/ipl_schedule.csv'
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """
-    Health check endpoint to ensure API is running.
-    """
+    """Health check endpoint to ensure API is running."""
     return jsonify({"status": "healthy", "message": "IPL Scheduling Optimizer API is running."})
 
 @app.route('/api/optimize', methods=['GET', 'POST'])
 def optimize():
-    """
-    Endpoint to trigger the scheduling optimization.
-    - POST: Accepts a CSV file upload for processing.
-    - GET: Falls back to using the default 'ipl_schedule.csv' if available.
-    """
+    """Endpoint to trigger the scheduling optimization."""
     try:
         if request.method == 'POST' and 'file' in request.files:
             file = request.files['file']
@@ -72,4 +66,5 @@ def optimize():
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
