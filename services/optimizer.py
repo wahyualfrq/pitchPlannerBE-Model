@@ -15,9 +15,9 @@ def standardize_columns(df):
             col_mapping[col] = 'Team_B'
         elif clean_col in ['VENUE', 'STADIUM', 'LOCATION', 'GROUND', 'MATCHVENUE']:
             col_mapping[col] = 'Venue'
-        elif clean_col in ['DATE', 'MATCHDATE', 'DATETIME', 'STARTDATE']:
+        elif clean_col in ['DATE', 'MATCHDATE', 'DATETIME', 'STARTDATE', 'STARTTIME']:
             col_mapping[col] = 'Date'
-        elif clean_col in ['TIME', 'MATCHTIME', 'STARTTIME']:
+        elif clean_col in ['TIME', 'MATCHTIME']:
             col_mapping[col] = 'Time'
         elif clean_col in ['PM/AM', 'AMPM', 'MERIDIEM']:
             col_mapping[col] = 'AmPm'

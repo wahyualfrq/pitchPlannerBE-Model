@@ -25,7 +25,13 @@ def optimize():
                 return jsonify({"success": False, "error": "No selected file."}), 400
                 
             if file and file.filename.endswith('.csv'):
-                df = pd.read_csv(file)
+                try:
+                    # Use sep=None with engine='python' to auto-detect delimiters like , or ;
+                    # Added skipinitialspace to handle spaces after delimiters
+                    df = pd.read_csv(file, sep=None, on_bad_lines='skip', engine='python', skipinitialspace=True)
+                except Exception as e:
+                    return jsonify({"success": False, "error": f"Failed to parse CSV: {str(e)}"}), 400
+                
                 df_processed = preprocess_data(df)
                 df_selected, df_rejected = optimize_schedule(df_processed)
                 
