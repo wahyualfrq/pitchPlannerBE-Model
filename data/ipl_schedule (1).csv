@@ -1,0 +1,6 @@
+MATCH NO,START_TIME,END_TIME,VENUE,HOME TEAM,AWAY TEAM
+1,2026-04-01 19:30:00,2026-04-01 23:00:00,Wankhede Stadium,Mumbai Indians,Chennai Super Kings
+2,2026-04-02 19:30:00,2026-04-02 23:00:00,Eden Gardens,Kolkata Knight Riders,Royal Challengers Bangalore
+3,2026-04-03 19:30:00,2026-04-03 23:00:00,Arun Jaitley Stadium,Delhi Capitals,Sunrisers Hyderabad
+4,2026-04-04 15:30:00,2026-04-04 19:00:00,Narendra Modi Stadium,Gujarat Titans,Rajasthan Royals
+5,2026-04-04 19:30:00,2026-04-04 23:00:00,M. Chinnaswamy Stadium,Royal Challengers Bangalore,Lucknow Super Giants

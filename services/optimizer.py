@@ -142,7 +142,8 @@ def optimize_schedule(df):
 
 def load_and_optimize(filepath='data/ipl_schedule.csv'):
     """Helper function to load data from file, preprocess, and optimize."""
-    df = pd.read_csv(filepath, on_bad_lines='skip')
+    # Gunakan parameter yang sama kuatnya dengan yang ada di app.py
+    df = pd.read_csv(filepath, sep=None, on_bad_lines='skip', engine='python', skipinitialspace=True, encoding='utf-8-sig')
     df_processed = preprocess_data(df)
     df_selected, df_rejected = optimize_schedule(df_processed)
     
