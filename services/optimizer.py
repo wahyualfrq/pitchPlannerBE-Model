@@ -13,8 +13,8 @@ def standardize_columns(df):
         (['HOMETEAM', 'TEAM1', 'TEAMA', 'HOME'], 'Team_A'),
         (['AWAYTEAM', 'TEAM2', 'TEAMB', 'AWAY'], 'Team_B'),
         (['VENUE', 'STADIUM', 'LOCATION', 'GROUND', 'MATCHVENUE'], 'Venue'),
-        (['DATE', 'MATCHDATE', 'DATETIME', 'STARTDATE'], 'Date'),
-        (['TIME', 'MATCHTIME', 'STARTTIME'], 'Time'),
+        (['DATE', 'MATCHDATE', 'DATETIME', 'STARTDATE', 'STARTTIME'], 'Date'),
+        (['TIME', 'MATCHTIME'], 'Time'),
         (['PM/AM', 'AMPM', 'MERIDIEM'], 'AmPm')
     ]
     
