@@ -19,7 +19,9 @@ def standardize_columns(df):
     ]
     
     for col in df.columns:
-        clean_col = str(col).upper().replace(' ', '').replace('_', '').replace('.', '')
+        # Hapus BOM character dari Excel (\ufeff), spasi, garis bawah, titik, dan tanda kutip
+        clean_col = str(col).upper().strip('\uFEFF\ufeff \t\n\r"\'')
+        clean_col = clean_col.replace(' ', '').replace('_', '').replace('.', '')
         
         for patterns, target in categories:
             if clean_col in patterns and target not in seen_targets:

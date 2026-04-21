@@ -28,7 +28,8 @@ def optimize():
                 try:
                     # Use sep=None with engine='python' to auto-detect delimiters like , or ;
                     # Added skipinitialspace to handle spaces after delimiters
-                    df = pd.read_csv(file, sep=None, on_bad_lines='skip', engine='python', skipinitialspace=True)
+                    # Added utf-8-sig to handle Excel BOM (Byte Order Mark) automatically
+                    df = pd.read_csv(file, sep=None, on_bad_lines='skip', engine='python', skipinitialspace=True, encoding='utf-8-sig')
                 except Exception as e:
                     return jsonify({"success": False, "error": f"Failed to parse CSV: {str(e)}"}), 400
                 
